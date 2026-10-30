@@ -1,8 +1,11 @@
+import json
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import ValidationError
 
+from llm import extract_items
 from parsers import EXTENSIONES, extract_text
 from schemas import Cuestionario
 
@@ -12,44 +15,7 @@ MAX_CHARS = 30_000
 app = FastAPI(title="Extractor de cuestionarios")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-# Respuesta fija del enunciado hasta conectar parsers y LLM (bloques 2 y 3).
-EJEMPLO = {
-    "titulo": "Questionario di esempio",
-    "idioma": "it",
-    "total_items": 3,
-    "items": [
-        {
-            "numero": 1,
-            "enunciado": "Mi preoccupo eccessivamente per cose di poca importanza.",
-            "tipo": "escala_likert",
-            "alternativas": [
-                {"valor": 0, "texto": "Mai"},
-                {"valor": 1, "texto": "A volte"},
-                {"valor": 2, "texto": "Spesso"},
-                {"valor": 3, "texto": "Sempre"},
-            ],
-            "respuesta_correcta": None,
-        },
-        {
-            "numero": 2,
-            "enunciado": "Quale numero completa la serie: 2, 4, 8, 16, ...?",
-            "tipo": "seleccion_multiple",
-            "alternativas": [
-                {"valor": "A", "texto": "18"},
-                {"valor": "B", "texto": "24"},
-                {"valor": "C", "texto": "32"},
-            ],
-            "respuesta_correcta": "C",
-        },
-        {
-            "numero": 3,
-            "enunciado": "Descriva una situazione recente in cui si è sentito sotto pressione.",
-            "tipo": "desarrollo",
-            "alternativas": [],
-            "respuesta_correcta": None,
-        },
-    ],
-}
+FORMATO_INESPERADO = "No se pudo interpretar el documento"
 
 
 @app.post("/extract", response_model=Cuestionario)
@@ -70,5 +36,21 @@ async def extract(file: UploadFile):
         raise HTTPException(422, "No se encontró texto en el documento")
     if len(texto) > MAX_CHARS:
         raise HTTPException(413, "El documento es demasiado grande")
-    # el texto se usará con el LLM en el bloque 3
-    return Cuestionario.model_validate(EJEMPLO)
+
+    try:
+        data = await extract_items(texto)
+    except json.JSONDecodeError:
+        raise HTTPException(502, FORMATO_INESPERADO)
+    except Exception:  # key inválida, límite 429, timeout o servicio caído
+        raise HTTPException(502, "El servicio de extracción no está disponible, intenta de nuevo")
+
+    try:
+        if not data["items"]:
+            raise HTTPException(422, "No se detectaron ítems en el documento")
+        # el número y el total los calcula el código, no el LLM; antes de validar
+        for i, item in enumerate(data["items"], 1):
+            item["numero"] = i
+        data["total_items"] = len(data["items"])
+        return Cuestionario.model_validate(data)
+    except (KeyError, TypeError, ValidationError):
+        raise HTTPException(502, FORMATO_INESPERADO)

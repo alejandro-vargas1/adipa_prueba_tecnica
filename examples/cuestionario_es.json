@@ -1,0 +1,114 @@
+{
+  "titulo": "Cuestionario de hábitos de estudio",
+  "idioma": "es",
+  "total_items": 6,
+  "items": [
+    {
+      "numero": 1,
+      "enunciado": "Organizo mi tiempo de estudio con anticipación.",
+      "tipo": "escala_likert",
+      "alternativas": [
+        {
+          "valor": 0,
+          "texto": "Nunca"
+        },
+        {
+          "valor": 1,
+          "texto": "A veces"
+        },
+        {
+          "valor": 2,
+          "texto": "Frecuentemente"
+        },
+        {
+          "valor": 3,
+          "texto": "Siempre"
+        }
+      ],
+      "respuesta_correcta": null
+    },
+    {
+      "numero": 2,
+      "enunciado": "Me cuesta concentrarme cuando estudio en casa.",
+      "tipo": "escala_likert",
+      "alternativas": [
+        {
+          "valor": 0,
+          "texto": "Nunca"
+        },
+        {
+          "valor": 1,
+          "texto": "A veces"
+        },
+        {
+          "valor": 2,
+          "texto": "Frecuentemente"
+        },
+        {
+          "valor": 3,
+          "texto": "Siempre"
+        }
+      ],
+      "respuesta_correcta": null
+    },
+    {
+      "numero": 3,
+      "enunciado": "¿Cuál es la capital de Chile?",
+      "tipo": "seleccion_multiple",
+      "alternativas": [
+        {
+          "valor": "A",
+          "texto": "Valparaíso"
+        },
+        {
+          "valor": "B",
+          "texto": "Santiago"
+        },
+        {
+          "valor": "C",
+          "texto": "Concepción"
+        }
+      ],
+      "respuesta_correcta": "B"
+    },
+    {
+      "numero": 4,
+      "enunciado": "Verdadero o falso: el agua hierve a 100 °C a nivel del mar.",
+      "tipo": "verdadero_falso",
+      "alternativas": [
+        {
+          "valor": "V",
+          "texto": "Verdadero"
+        },
+        {
+          "valor": "F",
+          "texto": "Falso"
+        }
+      ],
+      "respuesta_correcta": "V"
+    },
+    {
+      "numero": 5,
+      "enunciado": "Verdadero o falso: la Luna tiene luz propia.",
+      "tipo": "verdadero_falso",
+      "alternativas": [
+        {
+          "valor": "V",
+          "texto": "Verdadero"
+        },
+        {
+          "valor": "F",
+          "texto": "Falso"
+        }
+      ],
+      "respuesta_correcta": "F"
+    },
+    {
+      "numero": 6,
+      "enunciado": "Describa la técnica de estudio que le resulta más útil y por qué.",
+      "tipo": "desarrollo",
+      "alternativas": [],
+      "respuesta_correcta": null
+    }
+  ]
+}

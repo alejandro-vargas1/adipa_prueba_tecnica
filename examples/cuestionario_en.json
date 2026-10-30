@@ -1,0 +1,78 @@
+{
+  "titulo": "Workplace wellbeing survey",
+  "idioma": "en",
+  "total_items": 4,
+  "items": [
+    {
+      "numero": 1,
+      "enunciado": "I feel motivated at work.",
+      "tipo": "escala_likert",
+      "alternativas": [
+        {
+          "valor": 0,
+          "texto": "Strongly disagree"
+        },
+        {
+          "valor": 1,
+          "texto": "Disagree"
+        },
+        {
+          "valor": 2,
+          "texto": "Agree"
+        },
+        {
+          "valor": 3,
+          "texto": "Strongly agree"
+        }
+      ],
+      "respuesta_correcta": null
+    },
+    {
+      "numero": 2,
+      "enunciado": "Which planet is closest to the Sun?",
+      "tipo": "seleccion_multiple",
+      "alternativas": [
+        {
+          "valor": "A",
+          "texto": "Venus"
+        },
+        {
+          "valor": "B",
+          "texto": "Mercury"
+        },
+        {
+          "valor": "C",
+          "texto": "Mars"
+        },
+        {
+          "valor": "D",
+          "texto": "Earth"
+        }
+      ],
+      "respuesta_correcta": "B"
+    },
+    {
+      "numero": 3,
+      "enunciado": "True or false: a week has seven days.",
+      "tipo": "verdadero_falso",
+      "alternativas": [
+        {
+          "valor": "V",
+          "texto": "True"
+        },
+        {
+          "valor": "F",
+          "texto": "False"
+        }
+      ],
+      "respuesta_correcta": "V"
+    },
+    {
+      "numero": 4,
+      "enunciado": "Explain what a healthy work-life balance means to you.",
+      "tipo": "desarrollo",
+      "alternativas": [],
+      "respuesta_correcta": null
+    }
+  ]
+}

@@ -9,6 +9,7 @@ cd backend
 python3.13 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 .venv/bin/python -m pytest
+set -a; . ../.env; set +a   # carga GEMINI_API_KEY
 .venv/bin/uvicorn main:app --reload
 curl -F file=@../examples/cuestionario_it.docx localhost:8000/extract
 ```

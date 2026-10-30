@@ -3,7 +3,7 @@ import copy
 import pytest
 from pydantic import ValidationError
 
-from main import EJEMPLO
+from llm import EJEMPLO
 from schemas import Cuestionario
 
 
