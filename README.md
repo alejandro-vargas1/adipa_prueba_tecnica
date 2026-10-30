@@ -32,11 +32,27 @@ backend/
   llm.py           # texto -> dict (Gemini)
   schemas.py       # Cuestionario, Item, Alternativa
   tests/
-frontend/          # React + Vite, un componente (src/App.jsx)
+  Dockerfile
+frontend/          # React + Vite, un componente (src/App.jsx); Dockerfile con build + nginx
 examples/          # cuestionarios inventados y sus JSON resultantes
+docker-compose.yml # levanta backend y frontend
 ```
 
 ## Correr en local
+
+### Con Docker (recomendado)
+
+Requisitos: Docker y una API key de Gemini.
+
+```bash
+cp .env.example .env          # y completa GEMINI_API_KEY
+docker compose up --build
+```
+
+Frontend en http://localhost:5173 y API en http://localhost:8000 (imágenes `adipa_frontend` y `adipa_backend`).
+Para detenerlo: `Ctrl + C` o `docker compose down`.
+
+### Sin Docker
 
 Requisitos: Python 3.13, Node 20.19+ o 22.12+ y una API key de Gemini.
 
@@ -62,7 +78,8 @@ npm run dev
 | Variable | Dónde | Para qué |
 |---|---|---|
 | `GEMINI_API_KEY` | Backend | Key gratuita de [Google AI Studio](https://aistudio.google.com/apikey) |
-| `VITE_API_URL` | Frontend, al hacer el build | URL del backend. Por defecto `http://localhost:8000` |
+| `VITE_API_URL` | Frontend | URL del backend. Por defecto `http://localhost:8000`. En el contenedor se lee al arrancar; sin Docker (`npm run build`, Render), al hacer el build |
+| `PORT` | Backend, solo en el contenedor | Puerto de uvicorn. Por defecto `8000`; lo asignan plataformas como Railway o Cloud Run |
 
 El `.env` va en la raíz del repo y está en `.gitignore`. Solo se sube `.env.example`.
 
@@ -123,6 +140,21 @@ Cuestionarios inventados y la respuesta real de la API para cada uno:
 3. Build: `npm install && npm run build`
 4. Publish Directory: `dist`
 5. Environment: `VITE_API_URL` = URL del backend.
+
+## Deploy con Docker (cualquier plataforma)
+
+Las imágenes no llevan URLs ni keys dentro: todo se pasa como variable de entorno al arrancar.
+
+```bash
+docker build -t adipa_backend ./backend
+docker build -t adipa_frontend ./frontend
+
+docker run -p 8000:8000 -e GEMINI_API_KEY=... adipa_backend
+docker run -p 80:80 -e VITE_API_URL=https://api.midominio.com adipa_frontend
+```
+
+El frontend sirve con nginx en el puerto 80. Al arrancar escribe `VITE_API_URL` en `config.js`, así que la misma
+imagen sirve para cualquier backend sin reconstruirla.
 
 ## Supuestos
 

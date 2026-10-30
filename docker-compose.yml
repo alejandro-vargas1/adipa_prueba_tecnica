@@ -1,0 +1,17 @@
+services:
+  backend:
+    build: ./backend
+    image: adipa_backend
+    env_file: .env
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    image: adipa_frontend
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend

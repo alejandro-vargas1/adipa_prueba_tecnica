@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+// contenedor: config.js al arrancar · build estático (Render, npm): variable de build · local: por defecto
+const API_URL = window.API_URL || import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export default function App() {
   const [archivo, setArchivo] = useState(null);
