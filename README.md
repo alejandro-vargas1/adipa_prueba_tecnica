@@ -14,6 +14,14 @@ set -a; . ../.env; set +a   # carga GEMINI_API_KEY
 curl -F file=@../examples/cuestionario_it.docx localhost:8000/extract
 ```
 
+Frontend (con el backend corriendo en `localhost:8000`):
+
+```bash
+cd frontend
+npm install
+npm run dev   # http://localhost:5173
+```
+
 Variables de entorno: ver `.env.example`.
 
 ## Deploy del backend (Render)
@@ -23,3 +31,11 @@ Variables de entorno: ver `.env.example`.
 3. Build: `pip install -r requirements.txt`
 4. Start: `uvicorn main:app --host 0.0.0.0 --port $PORT`
 5. Environment: `GEMINI_API_KEY`.
+
+## Deploy del frontend (Render, Static Site)
+
+1. New → Static Site → conectar este repo.
+2. Root Directory: `frontend`.
+3. Build: `npm install && npm run build`
+4. Publish Directory: `dist`
+5. Environment: `VITE_API_URL` = URL del backend (se usa al hacer el build).

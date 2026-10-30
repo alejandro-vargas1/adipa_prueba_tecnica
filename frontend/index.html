@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Extractor de cuestionarios</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; min-height: 100vh; padding: 3rem 1rem;
+        display: flex; flex-direction: column; justify-content: center;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #1f2937; background: #f3f4f8;
+      }
+      main {
+        width: 100%; max-width: 720px; margin: 0 auto; padding: 2rem;
+        background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+      }
+      h1 { margin: 0 0 0.25rem; font-size: 1.6rem; }
+      .sub { margin: 0 0 1.5rem; color: #6b7280; }
+      .acciones { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+      .archivo {
+        flex: 1; min-width: 220px; padding: 0.7rem 1rem; cursor: pointer;
+        border: 2px dashed #c7cbe0; border-radius: 10px; color: #4b5563; background: #fafbff;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .archivo:hover { border-color: #4f46e5; }
+      .archivo input { display: none; }
+      button {
+        padding: 0.7rem 1.4rem; border: 0; border-radius: 10px; cursor: pointer;
+        font: inherit; font-weight: 600; color: #fff; background: #4f46e5;
+      }
+      button:hover:not(:disabled) { background: #4338ca; }
+      button:disabled { background: #a5a8d8; cursor: not-allowed; }
+      button.secundario { color: #4f46e5; background: #eef0ff; }
+      button.secundario:hover { background: #e0e3ff; }
+      .aviso { margin-top: 1rem; color: #6b7280; display: flex; gap: 0.6rem; align-items: center; }
+      .spinner {
+        width: 18px; height: 18px; flex: none; border-radius: 50%;
+        border: 3px solid #e0e3ff; border-top-color: #4f46e5; animation: girar 0.8s linear infinite;
+      }
+      @keyframes girar { to { transform: rotate(360deg); } }
+      .error { margin-top: 1rem; padding: 0.8rem 1rem; border-radius: 10px; color: #b91c1c; background: #fef2f2; }
+      .resumen {
+        margin: 1.5rem 0 1rem; display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;
+        justify-content: space-between;
+      }
+      .resumen h2 { margin: 0; font-size: 1.15rem; }
+      .etiqueta { margin-left: 0.5rem; padding: 0.15rem 0.6rem; border-radius: 999px; font-size: 0.8rem; background: #eef0ff; color: #4338ca; }
+      pre {
+        margin: 0; padding: 1rem; max-height: 55vh; overflow: auto; border-radius: 10px;
+        font-size: 0.85rem; color: #e5e7eb; background: #1e1e2e;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
