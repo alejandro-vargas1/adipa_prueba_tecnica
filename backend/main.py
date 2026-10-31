@@ -18,8 +18,8 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 FORMATO_INESPERADO = "No se pudo interpretar el documento"
 
 
-@app.post("/extract", response_model=Cuestionario)
-async def extract(file: UploadFile):
+async def leer_texto(file: UploadFile) -> str:
+    """Valida el archivo y devuelve su texto, o lanza el HTTPException que corresponde."""
     nombre = file.filename or ""
     if Path(nombre).suffix.lower() not in EXTENSIONES:
         raise HTTPException(400, "Formato no soportado. Usa PDF, DOCX o XLSX")
@@ -36,6 +36,12 @@ async def extract(file: UploadFile):
         raise HTTPException(422, "No se encontró texto en el documento")
     if len(texto) > MAX_CHARS:
         raise HTTPException(413, "El documento es demasiado grande")
+    return texto
+
+
+@app.post("/extract", response_model=Cuestionario)
+async def extract(file: UploadFile):
+    texto = await leer_texto(file)
 
     try:
         data = await extract_items(texto)
