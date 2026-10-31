@@ -3,24 +3,29 @@
 Sube un PDF, DOCX o XLSX con un cuestionario y recibe sus ítems, alternativas, respuesta correcta e idioma en un
 JSON estandarizado.
 
-**Demo:** Frontend: _pendiente_ · API: _pendiente_ (`/docs` para Swagger)
+**Demo:** Frontend: https://adipa-frontend-pt6w.onrender.com · API: https://adipa-backend.onrender.com
+(`/docs` para Swagger)
 
 > El backend corre en el plan gratuito de Render: si estaba inactivo, la primera petición puede tardar hasta un minuto.
 
 ## Cómo funciona
 
 ```
-archivo ──► parsers.py ──► llm.py ──► main.py ──► schemas.py ──► JSON
-            texto plano    Gemini     numera y    Pydantic
-                           (JSON)     cuenta      valida
+archivo ──► main.py ──► parsers.py ──► llm.py ──► main.py ──► schemas.py ──► JSON
+            valida      texto plano    Gemini     numera y    Pydantic
+            el archivo                 (JSON)     cuenta      valida
 ```
 
-1. **`parsers.py`** convierte el archivo en texto: pdfplumber (PDF), python-docx (párrafos y tablas en su orden,
-   negrita como `**texto**`) y openpyxl (cada fila como `celda | celda | ...`).
-2. **`llm.py`** manda el texto a Gemini con un prompt fijo (los 5 tipos, las reglas de valores y el JSON de ejemplo
+1. **`main.py`** valida el archivo antes de leerlo: extensión PDF, DOCX o XLSX (400), que no esté vacío (400) y que
+   pese como máximo 5 MB (413).
+2. **`parsers.py`** convierte el archivo en texto: pdfplumber (PDF), python-docx (párrafos y tablas en su orden,
+   negrita como `**texto**`) y openpyxl (cada fila como `celda | celda | ...`). Después `main.py` comprueba que se
+   pudo leer (400 si está dañado o renombrado), que tiene texto (422, p. ej. un PDF escaneado) y que no pasa de
+   30.000 caracteres (413).
+3. **`llm.py`** manda el texto a Gemini con un prompt fijo (los 5 tipos, las reglas de valores y el JSON de ejemplo
    del enunciado), temperatura 0 y salida JSON.
-3. **`main.py`** renumera los ítems y recalcula `total_items`: eso lo hace el código, no el LLM.
-4. **`schemas.py`** valida el resultado con Pydantic: tipos permitidos, que un ítem de desarrollo no tenga
+4. **`main.py`** renumera los ítems y recalcula `total_items`: eso lo hace el código, no el LLM.
+5. **`schemas.py`** valida el resultado con Pydantic: tipos permitidos, que un ítem de desarrollo no tenga
    alternativas, que `respuesta_correcta` exista entre las alternativas y que el idioma sea un código de 2 letras.
 
 El LLM propone y Pydantic decide: nada llega al usuario sin pasar por el esquema.
@@ -35,12 +40,10 @@ backend/
   Dockerfile
 frontend/          # React + Vite, un componente (src/App.jsx); Dockerfile con build + nginx
 examples/          # cuestionarios inventados y sus JSON resultantes
-docker-compose.yml # levanta backend y frontend
+docker-compose.yml # levanta backend y frontend en local
 ```
 
 ## Correr en local
-
-### Con Docker (recomendado)
 
 Requisitos: Docker y una API key de Gemini.
 
@@ -52,34 +55,16 @@ docker compose up --build
 Frontend en http://localhost:5173 y API en http://localhost:8000 (imágenes `adipa_frontend` y `adipa_backend`).
 Para detenerlo: `Ctrl + C` o `docker compose down`.
 
-### Sin Docker
-
-Requisitos: Python 3.13, Node 20.19+ o 22.12+ y una API key de Gemini.
-
-```bash
-cp .env.example .env          # y completa GEMINI_API_KEY
-
-# Terminal 1: backend en http://localhost:8000
-cd backend
-python3.13 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-.venv/bin/python -m pytest
-set -a; . ../.env; set +a     # carga GEMINI_API_KEY
-.venv/bin/uvicorn main:app --reload
-
-# Terminal 2: frontend en http://localhost:5173
-cd frontend
-npm install
-npm run dev
-```
+> `docker-compose.yml` es solo para probar en local. En producción cada servicio se despliega por separado en
+> Render (ver [Deploy](#deploy-render)).
 
 ## Variables de entorno
 
 | Variable | Dónde | Para qué |
 |---|---|---|
 | `GEMINI_API_KEY` | Backend | Key gratuita de [Google AI Studio](https://aistudio.google.com/apikey) |
-| `VITE_API_URL` | Frontend | URL del backend. Por defecto `http://localhost:8000`. En el contenedor se lee al arrancar; sin Docker (`npm run build`, Render), al hacer el build |
-| `PORT` | Backend, solo en el contenedor | Puerto de uvicorn. Por defecto `8000`; lo asignan plataformas como Railway o Cloud Run |
+| `VITE_API_URL` | Frontend | URL del backend, sin `/` al final. Por defecto `http://localhost:8000`. Con docker compose se lee al arrancar el contenedor; en Render, al hacer el build (si cambia, hay que redesplegar el frontend) |
+| `PORT` | Backend | Puerto de uvicorn. Por defecto `8000`; en Render lo asigna la plataforma |
 
 El `.env` va en la raíz del repo y está en `.gitignore`. Solo se sube `.env.example`.
 
@@ -104,8 +89,10 @@ Todos los errores traen un mensaje en español en `detail`, que es el que muestr
 ## Tests
 
 ```bash
-cd backend && .venv/bin/python -m pytest
+docker compose run --rm -v ./examples:/examples backend python -m pytest
 ```
+
+El volumen hace falta porque `test_endpoint.py` usa `examples/cuestionario_it.docx`, que no está dentro de la imagen.
 
 - `test_validation.py`: archivo `.txt`, vacío, de más de 5 MB, dañado y sin texto, cada uno con su código.
 - `test_schema.py`: el JSON del enunciado pasa; respuestas fuera de las alternativas, tipo inexistente, desarrollo
@@ -128,10 +115,10 @@ Cuestionarios inventados y la respuesta real de la API para cada uno:
 **Backend (Web Service)**
 
 1. New → Web Service → conectar este repo.
-2. Root Directory: `backend`. La versión de Python se toma de `backend/.python-version`.
-3. Build: `pip install -r requirements.txt`
-4. Start: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-5. Environment: `GEMINI_API_KEY`.
+2. Root Directory: `backend`. Render detecta el `Dockerfile` y usa Language: Docker, así que no hace falta comando
+   de build ni de start (uvicorn escucha en el `PORT` que asigna Render).
+3. Instance Type: Free.
+4. Environment: `GEMINI_API_KEY`.
 
 **Frontend (Static Site)**
 
@@ -140,21 +127,6 @@ Cuestionarios inventados y la respuesta real de la API para cada uno:
 3. Build: `npm install && npm run build`
 4. Publish Directory: `dist`
 5. Environment: `VITE_API_URL` = URL del backend.
-
-## Deploy con Docker (cualquier plataforma)
-
-Las imágenes no llevan URLs ni keys dentro: todo se pasa como variable de entorno al arrancar.
-
-```bash
-docker build -t adipa_backend ./backend
-docker build -t adipa_frontend ./frontend
-
-docker run -p 8000:8000 -e GEMINI_API_KEY=... adipa_backend
-docker run -p 80:80 -e VITE_API_URL=https://api.midominio.com adipa_frontend
-```
-
-El frontend sirve con nginx en el puerto 80. Al arrancar escribe `VITE_API_URL` en `config.js`, así que la misma
-imagen sirve para cualquier backend sin reconstruirla.
 
 ## Supuestos
 
